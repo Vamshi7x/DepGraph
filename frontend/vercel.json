@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://depgraph-backend.onrender.com/api/:path*"
+    }
+  ]
+}
