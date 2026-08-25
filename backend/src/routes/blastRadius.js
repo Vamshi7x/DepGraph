@@ -4,6 +4,26 @@ import { BLAST_RADIUS_BY_PACKAGE, BLAST_RADIUS_BY_CVE, BLAST_RADIUS_GRAPH } from
 
 const router = Router();
 
+// GET /api/blast-radius/cve/:cveId
+router.get('/cve/:cveId', async (req, res, next) => {
+  try {
+    const records = await runQuery(BLAST_RADIUS_BY_CVE, { cveId: req.params.cveId });
+    const affected = records.map(r => ({
+      package: r.get('package'),
+      description: r.get('description'),
+      vulnerablePackage: r.get('vulnerablePackage'),
+      hops: typeof r.get('hops')?.toNumber === 'function'
+        ? r.get('hops').toNumber()
+        : r.get('hops'),
+      severity: r.get('severity'),
+    }));
+
+    return res.json({ cveId: req.params.cveId, affected });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/blast-radius/:packageName
 router.get('/:packageName', async (req, res, next) => {
   try {
@@ -48,26 +68,6 @@ router.get('/:packageName', async (req, res, next) => {
       affected,
       graph: { nodes, links: uniqueLinks },
     });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// GET /api/blast-radius/cve/:cveId
-router.get('/cve/:cveId', async (req, res, next) => {
-  try {
-    const records = await runQuery(BLAST_RADIUS_BY_CVE, { cveId: req.params.cveId });
-    const affected = records.map(r => ({
-      package: r.get('package'),
-      description: r.get('description'),
-      vulnerablePackage: r.get('vulnerablePackage'),
-      hops: typeof r.get('hops')?.toNumber === 'function'
-        ? r.get('hops').toNumber()
-        : r.get('hops'),
-      severity: r.get('severity'),
-    }));
-
-    return res.json({ cveId: req.params.cveId, affected });
   } catch (err) {
     next(err);
   }

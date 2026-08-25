@@ -3,7 +3,12 @@ import config from '../config/index.js';
 
 const driver = neo4j.driver(
   config.neo4j.uri,
-  neo4j.auth.basic(config.neo4j.user, config.neo4j.password)
+  neo4j.auth.basic(config.neo4j.user, config.neo4j.password),
+  {
+    maxConnectionLifetime: 30 * 60 * 1000,
+    maxConnectionPoolSize: 50,
+    connectionAcquisitionTimeout: 10000,
+  }
 );
 
 export function getSession(mode = 'READ') {
